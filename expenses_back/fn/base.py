@@ -123,10 +123,6 @@ class SQLQuery:
     def save(self, table_name, dict_save, pk_name='id', is_values_list=True, is_first=True):
 
 
-
-        is_edicao = pk_name in dict_save
-
-
         columns_list = dict_save.keys()
 
         columns = ','.join(columns_list)

@@ -31,55 +31,55 @@ class SQLQuery:
 
 
 
-    def __query(self, query=None, parametros=None, is_serializado=True):
-            if parametros is None:
-                parametros = {}
+    def __query(self, query=None, parameters=None, is_serialized=True):
+            if parameters is None:
+                parameters = {}
 
-            self.parse_lista_para_tupla(parametros)
+            self.parse_list_to_tuple(parameters)
 
             # self.engine.dispose()
             with self.engine.begin() as conn:
-                texto = db.text(query)
-                self.resultset = conn.execute(texto, parametros)
+                text = db.text(query)
+                self.resultset = conn.execute(text, parameters)
 
             if self.resultset.returns_rows:
-                return list(self.resultset) if not is_serializado else self.get_dados_serializados()
+                return list(self.resultset) if not is_serialized else self.get_serialized_data()
             else:
                 return None
 
 
     @staticmethod
-    def parse_lista_para_tupla(parametros):
-        for p in parametros:
-            if isinstance(parametros[p], (list, set)):
-                if len(parametros[p]) > 0:
-                    parametros[p] = tuple(parametros[p])
+    def parse_list_to_tuple(parameters):
+        for p in parameters:
+            if isinstance(parameters[p], (list, set)):
+                if len(parameters[p]) > 0:
+                    parameters[p] = tuple(parameters[p])
                 else:
-                    parametros[p] = tuple([None])
+                    parameters[p] = tuple([None])
 
-            elif isinstance(parametros[p], tuple):
-                if len(parametros[p]) < 0:
-                    parametros[p] = tuple([None])
+            elif isinstance(parameters[p], tuple):
+                if len(parameters[p]) < 0:
+                    parameters[p] = tuple([None])
 
-    def get_dados_serializados(self):
+    def get_serialized_data(self):
         return [row._asdict() for row in self.resultset]
 
 
     def update(self, table_name, dict_update, dict_filter, pk_name='id', is_disable=False, is_values_list=False,
-               is_primeiro=True):
+               is_first=True):
 
 
 
-        lista_colunas = dict_update.keys()
+        lista_columns = dict_update.keys()
 
-        update = ','.join([f'{coluna} = :{coluna}' for coluna in lista_colunas])
+        update = ','.join([f'{column} = :{column}' for column in lista_columns])
 
         where = ''
-        for chave, valor in dict_filter.items():
-            if isinstance(valor, list):
-                where += f" {chave} in :{chave} and"
+        for key, value in dict_filter.items():
+            if isinstance(value, list):
+                where += f" {key} in :{key} and"
             else:
-                where += f" {chave} = :{chave} and"
+                where += f" {key} = :{key} and"
 
         where = where[:-3]  # Removendo o ultimo 'and'
 
@@ -87,60 +87,60 @@ class SQLQuery:
 
         dict_update.update(dict_filter)
 
-        retorno = self.__query(query=query, parametros=dict_update)
+        result = self.__query(query=query, parameters=dict_update)
 
-        return self.formatar_retorno(retorno=retorno, is_values_list=is_values_list, is_primeiro=is_primeiro)
+        return self.format_result(result=result, is_values_list=is_values_list, is_first=is_first)
 
 
     @staticmethod
-    def formatar_retorno(retorno=None, is_values_list=False, is_primeiro=False):
-        if not retorno:
-            return {} if is_primeiro else []
+    def format_result(result=None, is_values_list=False, is_first=False):
+        if not result:
+            return {} if is_first else []
 
         if is_values_list:
-            lista_retorno = []
-            for linha in retorno:
+            return_list = []
+            for row in result:
 
-                values = tuple(linha.values())
+                values = tuple(row.values())
                 if len(values) == 1:
-                    lista_retorno.append(values[0])
+                    return_list.append(values[0])
                 else:
-                    lista_retorno.append(values)
+                    return_list.append(values)
 
-            retorno = lista_retorno
+            result = return_list
 
-        if is_primeiro:
-            return retorno[0]
+        if is_first:
+            return result[0]
 
-        return retorno
+        return result
 
-    def select(self,query:str,parametros:dict={},is_values_list:bool=False,is_primeiro:bool=False):
+    def select(self,query:str,parameters:dict={},is_values_list:bool=False,is_first:bool=False):
 
-        retorno = self.__query(query=query,parametros=parametros,is_serializado=True)
+        result = self.__query(query=query,parameters=parameters,is_serialized=True)
 
-        return self.formatar_retorno(retorno=retorno, is_values_list=is_values_list, is_primeiro=is_primeiro)
+        return self.format_result(result=result, is_values_list=is_values_list, is_first=is_first)
 
-    def save(self, table_name, dict_save, pk_name='id', is_values_list=True, is_primeiro=True):
+    def save(self, table_name, dict_save, pk_name='id', is_values_list=True, is_first=True):
 
 
 
         is_edicao = pk_name in dict_save
 
 
-        lista_colunas = dict_save.keys()
+        lista_columns = dict_save.keys()
 
-        colunas = ','.join(lista_colunas)
-        nm_valores = ','.join([f':{coluna}' for coluna in lista_colunas])
-        update = ','.join([f'{coluna} = :{coluna}' for coluna in lista_colunas])
+        columns = ','.join(lista_columns)
+        values_name = ','.join([f':{column}' for column in lista_columns])
+        update = ','.join([f'{column} = :{column}' for column in lista_columns])
 
         query = f"""
-            insert into {table_name}({colunas}) values ({nm_valores}) 
+            insert into {table_name}({columns}) values ({values_name}) 
             on conflict ({pk_name}) do update set {update} RETURNING {pk_name};
         """
 
-        retorno = self.__query(query=query, parametros=dict_save)
+        result = self.__query(query=query, parameters=dict_save)
 
-        return self.formatar_retorno(retorno=retorno, is_values_list=is_values_list, is_primeiro=is_primeiro)
+        return self.format_result(result=result, is_values_list=is_values_list, is_first=is_first)
 
 
 
@@ -148,19 +148,19 @@ class SQLQuery:
 
 class ValidationError(Exception):
 
-    def __init__(self, mensagem: str = None, status_code: int = 400, retorno=None):
-        self.__mensagem = mensagem
-        self.__retorno = retorno
+    def __init__(self, message: str = None, status_code: int = 400, result=None):
+        self.__message = message
+        self.__result = result
         self.__status_code = status_code
-        super().__init__(self.__mensagem)
+        super().__init__(self.__message)
 
     @property
-    def retorno(self):
-        return self.__retorno
+    def result(self):
+        return self.__result
 
     @property
-    def mensagem(self):
-        return self.__mensagem
+    def message(self):
+        return self.__message
 
     @property
     def status_code(self):

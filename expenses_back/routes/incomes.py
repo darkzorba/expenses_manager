@@ -37,3 +37,10 @@ def delete_expense(id:str|int):
 
     return JSONResponse(content=response,status_code=response['status_code'])
 
+
+@router.post("/income/type")
+def save_income_type(name:str):
+
+    response = Incomes().save_income_type(name=name)
+
+    return JSONResponse(content=response,status_code=response['status_code'])

@@ -6,7 +6,7 @@ class Expenses(SQLQuery):
     def __init__(self):
         super().__init__()
 
-    @Response(desc_error="Error when searching expenses.", lista_retornos=['expenses'])
+    @Response(desc_error="Error when searching expenses.", return_list=['expenses'])
     def get_expenses_by_month(self,month:int) -> dict:
         ls_expenses = self.select(
         query=f"""
@@ -17,15 +17,16 @@ class Expenses(SQLQuery):
         from public.expenses e
             left join public.expense_type type
                 on type.id = e.type_id
-        where extract(month from e.date_expense) = :month
+        where extract(month from e.date_expense) = :month and e.status = true
 
-        """,parametros=dict(month=month)
+        """,parameters=dict(month=month)
         )
 
         total_income = self.select(query="""select sum(i.value)::float 
                                             from public.incomes i 
-                                            where extract(month from i.date_income) = :month""",parametros=dict(month=month),
-                                   is_primeiro=True,is_values_list=True) or 0
+                                            where extract(month from i.date_income) = :month
+                                            and i.status = true""",parameters=dict(month=month),
+                                   is_first=True,is_values_list=True) or 0
 
         total_expenses = sum(i['value'] for i in ls_expenses)
 
@@ -38,13 +39,14 @@ class Expenses(SQLQuery):
             'total_income':total_income
         }
 
-    @Response(desc_error="Error trying to save expense.",lista_retornos=['dict_expense'])
+    @Response(desc_error="Error trying to save expense.",return_list=['dict_expense'])
     def save_expanse(self,description:str,date:str,value:float,type:str|int,id:str|int=None) -> dict:
         dict_expense={
             'description':description,
             'date_expense':date,
             'value':value,
-            'type_id':type
+            'type_id':type,
+            'status': True
         }
         if id:
             dict_expense['id'] = id
@@ -54,10 +56,19 @@ class Expenses(SQLQuery):
 
         return dict_expense
 
-    @Response(desc_error="Error trying to delete expense.",lista_retornos=[])
+    @Response(desc_error="Error trying to delete expense.",return_list=[])
     def delete_expense(self,expense_id:str|int):
 
         id_return = self.update(table_name='expenses',dict_update=dict(status=False),dict_filter=dict(id=expense_id),
                                 is_values_list=True)
         if not id_return:
             raise Exception()
+
+    @Response(desc_error="Error trying to save expense type.",return_list=['dict_type'])
+    def save_expense_type(self,name:str):
+        dict_type={'name':name}
+
+        id_return = self.save(table_name='expense_type',dict_save=dict_type)
+        dict_type['id'] = id_return
+
+        return dict_type

@@ -11,72 +11,70 @@ class Response:
             self,
             desc_error: str,
             desc_success: str = '',
-            lista_retornos: list = None,
-            is_salvar_log: bool = False,
-            is_manter_retorno: bool = False,
+            return_list: list = None,
+            is_keep_result: bool = False,
     ):
         self.desc_success = desc_success
         self.desc_error = desc_error
-        self.lista_retornos = lista_retornos or []
-        self.is_salvar_log = is_salvar_log
-        self.is_manter_retorno = is_manter_retorno
+        self.return_list = return_list or []
+        self.is_keep_result = is_keep_result
 
-    def __call__(self, funcao) -> Callable[..., dict]:
+    def __call__(self, function) -> Callable[..., dict]:
         def wrapper(*args, **kwargs):
             response = {
                 'status': True,
                 'status_code': 200,
-                'descricao': self.desc_success,
+                'description': self.desc_success,
             }
-            retorno = None
+            result = None
             try:
-                retorno = funcao(*args, **kwargs)
+                result = function(*args, **kwargs)
 
             except ValidationError as e:
 
 
                 response['status'] = False
                 response['status_code'] = e.status_code
-                response['descricao'] = e.mensagem
-                retorno = e.retorno
+                response['description'] = e.message
+                result = e.result
 
             except Exception as e:
 
                 response['status'] = False
                 response['status_code'] = 500
-                response['descricao'] = self.desc_error
+                response['description'] = self.desc_error
 
-            if self.is_manter_retorno:
-                return retorno
+            if self.is_keep_result:
+                return result
 
-            if retorno is not None:
+            if result is not None:
                 try:
-                    if not self.lista_retornos:
-                        response['retorno'] = retorno
+                    if not self.return_list:
+                        response['result'] = result
 
-                    elif isinstance(retorno, dict):
-                        response[self.lista_retornos[0]] = retorno
+                    elif isinstance(result, dict):
+                        response[self.return_list[0]] = result
 
-                    elif isinstance(retorno, tuple):
-                        for nm_chave, valor in zip(self.lista_retornos, retorno):
-                            response[nm_chave] = valor
+                    elif isinstance(result, tuple):
+                        for key_name, value in zip(self.return_list, result):
+                            response[key_name] = value
 
-                    elif len(self.lista_retornos) == 1:
-                        response[self.lista_retornos[0]] = retorno
+                    elif len(self.return_list) == 1:
+                        response[self.return_list[0]] = result
 
                 except Exception as e:
 
                     response['status'] = False
                     response['status_code'] = 500
-                    response['descricao'] = 'Erro no decorator'
+                    response['description'] = 'Decorator Error!'
             else:
-                if self.lista_retornos:
-                    for retorno in self.lista_retornos:
-                        response[retorno] = None
+                if self.return_list:
+                    for result in self.return_list:
+                        response[result] = None
 
             return response
 
         # Add the decorator parameters to the wrapper function's signature
-        wrapper.__signature__ = inspect.signature(funcao)
+        wrapper.__signature__ = inspect.signature(function)
 
         return wrapper

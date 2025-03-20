@@ -70,9 +70,9 @@ class SQLQuery:
 
 
 
-        lista_columns = dict_update.keys()
+        columns_list = dict_update.keys()
 
-        update = ','.join([f'{column} = :{column}' for column in lista_columns])
+        update = ','.join([f'{column} = :{column}' for column in columns_list])
 
         where = ''
         for key, value in dict_filter.items():
@@ -127,11 +127,11 @@ class SQLQuery:
         is_edicao = pk_name in dict_save
 
 
-        lista_columns = dict_save.keys()
+        columns_list = dict_save.keys()
 
-        columns = ','.join(lista_columns)
-        values_name = ','.join([f':{column}' for column in lista_columns])
-        update = ','.join([f'{column} = :{column}' for column in lista_columns])
+        columns = ','.join(columns_list)
+        values_name = ','.join([f':{column}' for column in columns_list])
+        update = ','.join([f'{column} = :{column}' for column in columns_list])
 
         query = f"""
             insert into {table_name}({columns}) values ({values_name}) 

@@ -1,0 +1,35 @@
+<div style="margin-bottom: 20px;">
+  <button mat-raised-button color="primary" (click)="openExpenseDialog()">Add Expense</button>
+</div>
+
+<!-- Tabela -->
+<mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- Colunas da tabela -->
+  <ng-container matColumnDef="value">
+    <mat-header-cell *matHeaderCellDef> Value </mat-header-cell>
+    <mat-cell *matCellDef="let expense"> {{expense.value | currency}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="description">
+    <mat-header-cell *matHeaderCellDef> Description </mat-header-cell>
+    <mat-cell *matCellDef="let expense"> {{expense.description}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="date_expense">
+    <mat-header-cell *matHeaderCellDef> Date </mat-header-cell>
+    <mat-cell *matCellDef="let expense"> {{expense.date_expense}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="expense_percent">
+    <mat-header-cell *matHeaderCellDef> Expense Percent </mat-header-cell>
+    <mat-cell *matCellDef="let expense"> {{expense.expense_percent}}% </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="income_percent">
+    <mat-header-cell *matHeaderCellDef> Income Percent </mat-header-cell>
+    <mat-cell *matCellDef="let expense"> {{expense.income_percent}}% </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

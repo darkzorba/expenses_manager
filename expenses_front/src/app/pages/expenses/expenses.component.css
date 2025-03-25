@@ -1,0 +1,32 @@
+/* Estilo opcional para tabela */
+p-table {
+  margin: 0 auto;
+  max-width: 90%;
+}
+.custom-table {
+  font-family: 'Arial', sans-serif;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.custom-table .p-datatable-tbody > tr > td {
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-table .p-datatable-thead > tr > th {
+  background-color: #007bff;
+  color: white;
+  text-align: left;
+  padding: 10px;
+}
+
+.custom-table .p-datatable-tfoot > tr > td {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+.custom-table td, .custom-table th {
+  padding: 10px;
+  border: 1px solid #ccc;
+}

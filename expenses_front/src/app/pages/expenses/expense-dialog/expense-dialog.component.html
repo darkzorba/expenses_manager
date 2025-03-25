@@ -1,0 +1,45 @@
+<h1 mat-dialog-title>Add Expense</h1>
+<div mat-dialog-content>
+  <form [formGroup]="expenseForm">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Value</mat-label>
+      <input matInput formControlName="value" type="number" required />
+      <mat-error *ngIf="expenseForm.controls['value'].hasError('required')">
+        Value is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description" required />
+      <mat-error *ngIf="expenseForm.controls['description'].hasError('required')">
+        Description is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Campo de tipo como ComboBox -->
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type" required>
+        <mat-option *ngFor="let type of types" [value]="type">{{ type }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="expenseForm.controls['type'].hasError('required')">
+        Type is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Campo de data como DatePicker -->
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Date</mat-label>
+      <mat-datepicker #picker></mat-datepicker>
+      <input matInput [matDatepicker]="picker" formControlName="date_expense" required />
+      <mat-error *ngIf="expenseForm.controls['date_expense'].hasError('required')">
+        Date is required
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onSave()">Save</button>
+</div>

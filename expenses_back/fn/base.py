@@ -81,7 +81,7 @@ class SQLQuery:
             else:
                 where += f" {key} = :{key} and"
 
-        where = where[:-3]  # Removendo o ultimo 'and'
+        where = where[:-3]  # Removing the last 'and'
 
         query = f'update {table_name} set {update} where {where} returning {pk_name};'
 
